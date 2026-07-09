@@ -1,0 +1,10 @@
+target/
+*.class
+.idea/
+*.iml
+.vscode/
+shots/
+
+# Бэкапы (страховочные копии не коммитим)
+*.bak
+pom.xml.bak
