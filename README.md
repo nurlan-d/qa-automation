@@ -1,7 +1,10 @@
 # QA Automation — тестовый фреймворк (JUnit 5 + REST Assured + Playwright)
 
-<!-- После создания репозитория замени OWNER/REPO на свой логин и название репозитория -->
-[![tests](https://github.com/OWNER/REPO/actions/workflows/tests.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/tests.yml)
+[![tests](https://github.com/nurlan-d/qa-automation/actions/workflows/tests.yml/badge.svg)](https://github.com/nurlan-d/qa-automation/actions/workflows/tests.yml)
+[![Java](https://img.shields.io/badge/Java-17-orange)](https://adoptium.net/)
+[![JUnit5](https://img.shields.io/badge/JUnit-5-green)](https://junit.org/junit5/)
+[![REST Assured](https://img.shields.io/badge/REST%20Assured-5.4-blue)](https://rest-assured.io/)
+[![Playwright](https://img.shields.io/badge/Playwright-1.61-2EAD33)](https://playwright.dev/java/)
 
 Учебно-портфельный проект автотестов. Показывает три вещи, которые ждут от QA-инженера:
 API-тесты, UI-тесты и регрессионную сетку на реальные найденные дефекты.
@@ -23,34 +26,38 @@ qa-automation/
 
 ## Требования
 
-- **JDK 11+** (проверь: `java -version`)
-- **Maven 3.8+** (проверь: `mvn -v`)
+- **JDK 17+** (проверь: `java -version`)
+- **Maven ставить не нужно** — в проект встроен Maven Wrapper (`./mvnw`), он сам скачает нужную версию Maven
 - Доступ в интернет (тесты бьют по живым учебным сайтам)
 
 Браузер для Playwright скачается автоматически при первом запуске. Если нет — поставь вручную:
 
 ```
-mvn exec:java -e -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install chromium"
+./mvnw exec:java -e -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.classpathScope=test -Dexec.args="install chromium"
 ```
 
 ## Как запустить
 
-Все тесты:
+Maven ставить не нужно — используется встроенный wrapper `./mvnw` (на Windows: `mvnw.cmd`).
+
+Клонировать и прогнать всё:
 
 ```
-mvn test
+git clone https://github.com/nurlan-d/qa-automation.git
+cd qa-automation
+./mvnw test
 ```
 
 Только API (быстро, без браузера):
 
 ```
-mvn test -Dtest=RestfulBookerApiTest
+./mvnw test -Dtest=RestfulBookerApiTest
 ```
 
 Только UI:
 
 ```
-mvn test -Dtest=SauceDemoTest
+./mvnw test -Dtest=SauceDemoTest
 ```
 
 Ожидаемый результат «из коробки»: **16 тестов зелёные** (10 API + 6 UI), **6 регрессий пропущены** (`@Disabled` — это открытые баги problem_user).
