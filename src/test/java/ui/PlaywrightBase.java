@@ -1,6 +1,7 @@
 package ui;
 
 import com.microsoft.playwright.*;
+import data.SauceDemoUser;
 import org.junit.jupiter.api.*;
 
 /**
@@ -39,11 +40,20 @@ public abstract class PlaywrightBase {
         if (context != null) context.close();
     }
 
-    /** Логин в Swag Labs указанным пользователем. */
+    /** Логин в Swag Labs произвольными строками — для негативных проверок формы. */
     protected void login(String user, String pass) {
         page.navigate("https://www.saucedemo.com/");
         page.fill("#user-name", user);
         page.fill("#password", pass);
         page.click("#login-button");
+    }
+
+    /**
+     * Логин фиксированной учёткой тренажёра. Предпочитай эту перегрузку:
+     * персона названа явно, а пароль берётся из одного места
+     * ({@link SauceDemoUser#PASSWORD}), а не дублируется строкой по тестам.
+     */
+    protected void login(SauceDemoUser user) {
+        login(user.username(), user.password());
     }
 }

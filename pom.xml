@@ -45,6 +45,14 @@
             <version>1.61.0</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- Datafaker (генерация тестовых данных). Требует Java 17+ -->
+        <dependency>
+            <groupId>net.datafaker</groupId>
+            <artifactId>datafaker</artifactId>
+            <version>2.7.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

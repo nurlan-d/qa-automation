@@ -1,6 +1,7 @@
 package ui;
 
 import com.microsoft.playwright.Locator;
+import data.SauceDemoUser;
 import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ class ProblemUserRegressionTest extends PlaywrightBase {
 
     @BeforeEach
     void loginAsProblemUser() {
-        login("problem_user", "secret_sauce");
+        login(SauceDemoUser.PROBLEM);
     }
 
     @Test

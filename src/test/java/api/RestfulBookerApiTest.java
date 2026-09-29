@@ -1,7 +1,9 @@
 package api;
 
+import data.BookingFactory;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import model.Booking;
 import org.junit.jupiter.api.*;
 
 import static io.restassured.RestAssured.given;
@@ -11,12 +13,21 @@ import static org.hamcrest.Matchers.*;
  * API-тесты Restful-Booker (https://restful-booker.herokuapp.com).
  * Полный CRUD с авторизацией. Порядок важен: create -> get -> auth -> update -> delete,
  * поэтому используем @TestMethodOrder.
+ *
+ * <p>Тела запросов берутся из {@link BookingFactory}, а не пишутся строкой.
+ * Захардкоженные «Ivan/Petrov» каждый прогон проверяли ровно один набор данных;
+ * фабрика даёт новые реалистичные значения, а проверки идут против того же
+ * объекта, который отправили. Граничные и негативные наборы вынесены в
+ * {@link RestfulBookerNegativeTest}.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class RestfulBookerApiTest {
 
     private static int bookingId;
     private static String token;
+
+    /** Что именно создали в TC-3.1 — против него проверяем в TC-3.3. */
+    private static Booking created;
 
     @BeforeAll
     static void setup() {
@@ -38,25 +49,19 @@ class RestfulBookerApiTest {
     @Order(2)
     @DisplayName("TC-3.1 Создать бронирование -> 200 + bookingid")
     void createBooking() {
-        String body = "{"
-                + "\"firstname\":\"Ivan\","
-                + "\"lastname\":\"Petrov\","
-                + "\"totalprice\":150,"
-                + "\"depositpaid\":true,"
-                + "\"bookingdates\":{\"checkin\":\"2026-07-10\",\"checkout\":\"2026-07-15\"},"
-                + "\"additionalneeds\":\"Breakfast\""
-                + "}";
+        created = BookingFactory.validUniqueBooking();
 
         bookingId = given()
                 .contentType(ContentType.JSON)
-                .body(body)
+                .body(created.toJson())
         .when()
                 .post("/booking")
         .then()
                 .statusCode(200)
                 .body("bookingid", notNullValue())
-                .body("booking.firstname", equalTo("Ivan"))
-                .body("booking.lastname", equalTo("Petrov"))
+                .body("booking.firstname", equalTo(created.getFirstname()))
+                .body("booking.lastname", equalTo(created.getLastname()))
+                .body("booking.totalprice", equalTo(created.getTotalprice()))
                 .extract().path("bookingid");
     }
 
@@ -81,7 +86,8 @@ class RestfulBookerApiTest {
                 .get("/booking/" + bookingId)
         .then()
                 .statusCode(200)
-                .body("firstname", equalTo("Ivan"));
+                .body("firstname", equalTo(created.getFirstname()))
+                .body("lastname", equalTo(created.getLastname()));
     }
 
     @Test
@@ -103,24 +109,18 @@ class RestfulBookerApiTest {
     @Order(6)
     @DisplayName("TC-3.6 Обновить бронирование с токеном -> 200")
     void updateWithToken() {
-        String body = "{"
-                + "\"firstname\":\"Ivan\","
-                + "\"lastname\":\"Ivanov\","
-                + "\"totalprice\":200,"
-                + "\"depositpaid\":false,"
-                + "\"bookingdates\":{\"checkin\":\"2026-08-01\",\"checkout\":\"2026-08-05\"},"
-                + "\"additionalneeds\":\"Lunch\""
-                + "}";
+        Booking updated = BookingFactory.validUniqueBooking();
 
         given()
                 .contentType(ContentType.JSON)
                 .header("Cookie", "token=" + token)
-                .body(body)
+                .body(updated.toJson())
         .when()
                 .put("/booking/" + bookingId)
         .then()
                 .statusCode(200)
-                .body("lastname", equalTo("Ivanov"));
+                .body("firstname", equalTo(updated.getFirstname()))
+                .body("lastname", equalTo(updated.getLastname()));
     }
 
     @Test
@@ -143,7 +143,7 @@ class RestfulBookerApiTest {
     void createIncomplete() {
         given()
                 .contentType(ContentType.JSON)
-                .body("{\"firstname\":\"OnlyName\"}")
+                .body(BookingFactory.incompleteBody().toJson())
         .when()
                 .post("/booking")
         .then()
